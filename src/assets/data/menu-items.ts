@@ -8,6 +8,7 @@ export type MenuItemTypes = {
     variant: string;
     text: string;
   };
+  logout?: boolean;
   parentKey?: string;
   target?: string;
   children?: MenuItemTypes[];
@@ -73,6 +74,23 @@ const MENU_ITEMS: MenuItemTypes[] = [
       variant: "success",
       text: "9+",
     },
+  },
+  {
+    key: "authentication",
+    label: "Authentication",
+    isTitle: true,
+  },
+  {
+    key: "logout",
+    label: "Logout",
+    isTitle: false,
+    url: "/",
+    icon: "ri-logout-box-r-line",
+    badge: {
+      variant: "danger",
+      text: "9+",
+    },
+    logout: true,
   },
   {
     key: "pages",
