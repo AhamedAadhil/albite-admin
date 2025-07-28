@@ -1,5 +1,6 @@
 "use client";
 
+import { toBase64 } from "@/helper/toBase64";
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
@@ -23,6 +24,9 @@ export default function CreateDishModal({ show, onHide }: Props) {
     availableBefore: "11:00",
     maxPreorderDays: 3,
     parcelOptions: ["box", "bag"],
+    isRecommended: false,
+    isNewDish: false,
+    isPopular: false,
     isActive: true,
   });
 
@@ -60,44 +64,58 @@ export default function CreateDishModal({ show, onHide }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    let imageUrl = "";
-
-    if (imageFile) {
-      setUploading(true);
-
-      const formDataImage = new FormData();
-      formDataImage.append("file", imageFile);
-      formDataImage.append("upload_preset", "your_upload_preset");
-
-      try {
-        const res = await fetch(
-          "https://api.cloudinary.com/v1_1/your_cloud_name/image/upload",
-          {
-            method: "POST",
-            body: formDataImage,
-          }
-        );
-
-        const data = await res.json();
-        imageUrl = data.secure_url;
-      } catch (error) {
-        console.error("Image upload failed", error);
-        setUploading(false);
-        return;
-      }
-
-      setUploading(false);
+    // Validate required image file
+    if (!imageFile) {
+      alert("Please upload an image.");
+      return;
     }
 
-    const dishData = {
+    setUploading(true);
+
+    let base64Image = "";
+
+    try {
+      base64Image = await toBase64(imageFile);
+    } catch (error) {
+      console.error("Failed to convert image:", error);
+      setUploading(false);
+      return;
+    }
+
+    // Build request body
+    const dishPayload = {
       ...formData,
-      image: imageUrl,
+      price: Number(formData.price),
+      calories: Number(formData.calories),
+      servings: Number(formData.servings),
+      maxPreorderDays: Number(formData.maxPreorderDays),
+      image: base64Image,
     };
 
-    console.log("Submit dish:", dishData);
-    // Optionally call your backend API here
+    try {
+      const res = await fetch("/api/protected/create-dish", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dishPayload),
+      });
 
-    onHide();
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to create dish");
+        throw new Error(data.message || "Failed to create dish");
+      }
+
+      alert("Dish created successfully ✅");
+      onHide(); // Close modal
+    } catch (error: any) {
+      console.error("Submit error:", error);
+      alert(error.message || "Something went wrong");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -242,6 +260,27 @@ export default function CreateDishModal({ show, onHide }: Props) {
 
           <Form.Group className="mb-3">
             <Form.Check
+              label="Recommended Dish"
+              name="isRecommended"
+              checked={formData.isRecommended}
+              onChange={handleChange}
+            />
+            <Form.Check
+              label="New Dish"
+              name="isNewDish"
+              checked={formData.isNewDish}
+              onChange={handleChange}
+            />
+            <Form.Check
+              label="Popular Dish"
+              name="isPopular"
+              checked={formData.isPopular}
+              onChange={handleChange}
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Check
               label="Active"
               name="isActive"
               checked={formData.isActive}
@@ -254,8 +293,14 @@ export default function CreateDishModal({ show, onHide }: Props) {
           <Button variant="secondary" onClick={onHide}>
             Cancel
           </Button>
-          <Button variant="primary" type="submit">
-            <i className="ri-save-3-line me-1"></i>Save Dish
+          <Button variant="primary" type="submit" disabled={uploading}>
+            {uploading ? (
+              "Uploading..."
+            ) : (
+              <>
+                <i className="ri-save-3-line me-1"></i>Save Dish
+              </>
+            )}
           </Button>
         </Modal.Footer>
       </Form>

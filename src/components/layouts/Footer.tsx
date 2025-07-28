@@ -1,17 +1,17 @@
-import { Container, Row } from 'react-bootstrap'
+import { Container, Row } from "react-bootstrap";
 
 const Footer = () => {
-	return (
-		<footer className="footer">
-			<Container fluid>
-				<Row className="row">
-					<div className="col-12 text-center">
-						{new Date().getFullYear()} © Velonic - Theme by <b>Techzaa</b>
-					</div>
-				</Row>
-			</Container>
-		</footer>
-	)
-}
+  return (
+    <footer className="footer">
+      <Container fluid>
+        <Row className="row">
+          <div className="col-12 text-center">
+            {new Date().getFullYear()} © Ahamed Aathil - A2Labz Pvt Ltd.
+          </div>
+        </Row>
+      </Container>
+    </footer>
+  );
+};
 
-export default Footer
+export default Footer;

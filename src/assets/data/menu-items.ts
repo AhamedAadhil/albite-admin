@@ -6,7 +6,7 @@ export type MenuItemTypes = {
   url?: string;
   badge?: {
     variant: string;
-    text: string;
+    text?: string;
   };
   logout?: boolean;
   parentKey?: string;
@@ -28,7 +28,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-dashboard-3-line",
     badge: {
       variant: "success",
-      text: "9+",
     },
   },
   {
@@ -46,7 +45,7 @@ const MENU_ITEMS: MenuItemTypes[] = [
     key: "addons",
     label: "Add-ons",
     isTitle: false,
-    url: "/",
+    url: "/add-ons",
     icon: "ri-add-circle-line",
     badge: {
       variant: "success",
@@ -57,7 +56,7 @@ const MENU_ITEMS: MenuItemTypes[] = [
     key: "orders",
     label: "Orders",
     isTitle: false,
-    url: "/",
+    url: "/orders",
     icon: "ri-file-list-3-line",
     badge: {
       variant: "success",
@@ -68,8 +67,19 @@ const MENU_ITEMS: MenuItemTypes[] = [
     key: "users",
     label: "Users",
     isTitle: false,
-    url: "/",
+    url: "/users",
     icon: "ri-user-line",
+    badge: {
+      variant: "success",
+      text: "9+",
+    },
+  },
+  {
+    key: "banners",
+    label: "Banners",
+    isTitle: false,
+    url: "/banners",
+    icon: "ri-gallery-fill",
     badge: {
       variant: "success",
       text: "9+",
