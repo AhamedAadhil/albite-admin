@@ -5,6 +5,7 @@ import connectDB from "@/config/db";
 import Dish from "@/models/dish";
 import { verifyToken } from "@/helper/isVerified";
 
+// Create new Dish
 // GET /api/protected/dishes
 export const GET = async (req: NextRequest) => {
   try {

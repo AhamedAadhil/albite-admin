@@ -38,7 +38,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-restaurant-2-line",
     badge: {
       variant: "success",
-      text: "9+",
     },
   },
   {
@@ -49,7 +48,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-add-circle-line",
     badge: {
       variant: "success",
-      text: "9+",
     },
   },
   {
@@ -60,7 +58,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-file-list-3-line",
     badge: {
       variant: "success",
-      text: "9+",
     },
   },
   {
@@ -71,7 +68,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-user-line",
     badge: {
       variant: "success",
-      text: "9+",
     },
   },
   {
@@ -82,7 +78,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-gallery-fill",
     badge: {
       variant: "success",
-      text: "9+",
     },
   },
   {
@@ -98,7 +93,6 @@ const MENU_ITEMS: MenuItemTypes[] = [
     icon: "ri-logout-box-r-line",
     badge: {
       variant: "danger",
-      text: "9+",
     },
     logout: true,
   },

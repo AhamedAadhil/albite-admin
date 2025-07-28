@@ -59,6 +59,27 @@ export default function DishesPage() {
     fetchDishes(); // call only once at initial load
   }, []);
 
+  // useEffect(() => {
+  //   if (existingAddOn) {
+  //     setFormData({
+  //       name: existingAddOn.name,
+  //       price: String(existingAddOn.price),
+  //       mainCategory: existingAddOn.mainCategory,
+  //       isActive: existingAddOn.isActive,
+  //     });
+  //     // Optionally preload image preview (if available)
+  //     // Skip file setting as it's not a File object
+  //   } else {
+  //     setFormData({
+  //       name: "",
+  //       price: "",
+  //       mainCategory: "breakfast",
+  //       isActive: true,
+  //     });
+  //     setImageFile(null);
+  //   }
+  // }, [existingAddOn, show]);
+
   return (
     <Container fluid>
       <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
@@ -68,12 +89,6 @@ export default function DishesPage() {
         </Button>
         <CreateDishModal show={showModal} onHide={toggleModal} />
       </div>
-
-      {loading && (
-        <div className="text-center mt-5">
-          <Spinner animation="border" variant="primary" />
-        </div>
-      )}
 
       {error && (
         <Alert variant="danger" className="text-center">
@@ -129,6 +144,12 @@ export default function DishesPage() {
           Apply Filters
         </Button>
       </Form>
+
+      {loading && (
+        <div className="text-center mt-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      )}
 
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
         {dishes.map((dish) => (
