@@ -74,7 +74,7 @@ export default function CreateAddOnModal({ show, onHide }: Props) {
     };
 
     try {
-      const res = await fetch("/api/protected/create-addon", {
+      const res = await fetch("/api/protected/addons", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,6 +90,14 @@ export default function CreateAddOnModal({ show, onHide }: Props) {
       }
 
       alert("Add-on created successfully ✅");
+      // Reset form after success
+      setFormData({
+        name: "",
+        price: "",
+        mainCategory: "breakfast",
+        isActive: true,
+      });
+      setImageFile(null);
       onHide();
     } catch (error: any) {
       console.error("Submit error:", error);

@@ -107,6 +107,25 @@ export default function UpdateDishModal({ show, onHide, dishId }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       alert("Dish updated successfully!");
+
+      // ✅ Reset the form to default state
+      setFormData({
+        name: "",
+        description: "",
+        image: "",
+        price: "",
+        calories: "",
+        servings: "",
+        isRecommended: false,
+        isNewDish: false,
+        isPopular: false,
+        mainCategory: "breakfast",
+        availableBefore: "11:00",
+        maxPreorderDays: 3,
+        parcelOptions: ["box", "bag"],
+        isActive: true,
+      });
+
       onHide();
     } catch (error: any) {
       alert("Failed to update dish: " + error.message);

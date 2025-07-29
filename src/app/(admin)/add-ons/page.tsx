@@ -1,71 +1,83 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Button, Form, Spinner } from "react-bootstrap";
 import AddOnCard from "./AddOnCard";
 import CreateAddOnModal from "./CreateAddOnModal";
+import UpdateAddOnModal from "./UpdateAddOnModal";
+import { Addon } from "@/types/addon";
+import { set } from "mongoose";
 
 export default function AddOnsPage() {
-  const [showAddOnModal, setShowAddOnModal] = useState(false);
-  const [selectedAddOn, setSelectedAddOn] = useState<
-    (typeof dummyAddOns)[0] | null
-  >(null);
+  const [addons, setAddOns] = useState<Addon[]>([]); // ✅ hold add-ons data
+  const [showCreateModal, setShowCreateModal] = useState(false); // ✅ for create modal
+  const [showUpdateModal, setShowUpdateModal] = useState(false); // ✅ for update modal
+  const [editAddOnId, setEditAddOnId] = useState<string | null>(null); // ✅ hold id
+  const [loading, setLoading] = useState(true); // ✅ loading state
 
-  const dummyAddOns = [
-    {
-      _id: "1",
-      name: "Cheese Dip",
-      price: 150,
-      image: "/images/ketchup.jpg",
-      mainCategory: "lunch" as "lunch",
-      isActive: true,
-    },
-    {
-      _id: "2",
-      name: "Spicy Sauce",
-      price: 100,
-      image: "/images/leg.jpg",
-      mainCategory: "dinner" as "dinner",
-      isActive: false,
-    },
-    {
-      _id: "3",
-      name: "Ketchup Sachet",
-      price: 50,
-      image: "/images/ketchup.jpg",
-      mainCategory: "breakfast" as "breakfast",
-      isActive: true,
-    },
-  ];
+  const fetchAddOns = async () => {
+    try {
+      setLoading(true); // ✅ set loading to true
+      const res = await fetch("/api/protected/addons");
+      const data = await res.json();
+      if (!res.ok) {
+        setLoading(false); // ✅ set loading to false on error
+        throw new Error(data.message);
+      }
+      setAddOns(data.addons);
+      setLoading(false); // ✅ set loading to false after fetching
+    } catch (err: any) {
+      setLoading(false); // ✅ set loading to false on error
+      console.error("Failed to load add-ons", err.message);
+    }
+  };
 
-  // State to hold selected category filter
+  useEffect(() => {
+    fetchAddOns();
+  }, []);
+
   const [categoryFilter, setCategoryFilter] = useState<string>("");
 
-  // Filtered list based on categoryFilter
   const filteredAddOns = categoryFilter
-    ? dummyAddOns.filter((a) => a.mainCategory === categoryFilter)
-    : dummyAddOns;
+    ? addons.filter((a) => a.mainCategory === categoryFilter)
+    : addons;
 
-  // Placeholder for create modal toggle or any create logic
   const handleCreateClick = () => {
-    setSelectedAddOn(null); // clear any existing data
-    setShowAddOnModal(true); // open modal
+    setShowCreateModal(true);
+  };
+
+  const handleEditClick = (id: string) => {
+    setEditAddOnId(id);
+    setShowUpdateModal(true);
   };
 
   return (
     <Container fluid className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="fw-bold">Add-ons ({filteredAddOns.length})</h4>
+        <h4 className="fw-bold">Add-ons ({filteredAddOns?.length})</h4>
         <Button variant="success" onClick={handleCreateClick}>
           <i className="ri-add-line"></i> Create New Add-on
         </Button>
+
+        {/* CREATE MODAL */}
         <CreateAddOnModal
-          show={showAddOnModal}
+          show={showCreateModal}
           onHide={() => {
-            setShowAddOnModal(false);
-            setSelectedAddOn(null);
+            setShowCreateModal(false);
+            fetchAddOns();
           }}
-          existingAddOn={selectedAddOn}
+          existingAddOn={null}
+        />
+
+        {/* UPDATE MODAL */}
+        <UpdateAddOnModal
+          show={showUpdateModal}
+          onHide={() => {
+            setShowUpdateModal(false);
+            setEditAddOnId(null);
+            fetchAddOns();
+          }}
+          addOnId={editAddOnId}
         />
       </div>
 
@@ -81,15 +93,18 @@ export default function AddOnsPage() {
         </Form.Select>
       </Form>
 
+      {loading && (
+        <div className="text-center mt-5">
+          <Spinner animation="border" variant="primary" />
+        </div>
+      )}
+
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {filteredAddOns.map((addon) => (
+        {filteredAddOns?.map((addon) => (
           <Col key={addon._id}>
             <AddOnCard
               {...addon}
-              onEdit={() => {
-                setSelectedAddOn(addon);
-                setShowAddOnModal(true);
-              }}
+              onEdit={() => handleEditClick(addon._id)} // ✅ open edit modal
             />
           </Col>
         ))}

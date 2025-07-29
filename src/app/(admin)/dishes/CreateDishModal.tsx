@@ -108,6 +108,24 @@ export default function CreateDishModal({ show, onHide }: Props) {
         throw new Error(data.message || "Failed to create dish");
       }
 
+      setFormData({
+        name: "",
+        description: "",
+        image: "",
+        price: "",
+        calories: "",
+        servings: "",
+        isRecommended: false,
+        isNewDish: false,
+        isPopular: false,
+        mainCategory: "breakfast",
+        availableBefore: "11:00",
+        maxPreorderDays: 3,
+        parcelOptions: ["box", "bag"],
+        isActive: true,
+      });
+      setImageFile(null);
+
       alert("Dish created successfully ✅");
       onHide(); // Close modal
     } catch (error: any) {
