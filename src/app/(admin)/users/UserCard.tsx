@@ -80,7 +80,7 @@ export default function UserCard({ user: initialUser }: Props) {
         {/* Avatar */}
         <div
           className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0"
-          style={{ width: 58, height: 58, fontWeight: "bold", fontSize: 28 }}
+          style={{ width: 48, height: 48, fontWeight: "bold", fontSize: 18 }}
         >
           {getInitials(user.name)}
         </div>

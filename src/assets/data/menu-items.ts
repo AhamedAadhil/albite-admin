@@ -71,10 +71,10 @@ const MENU_ITEMS: MenuItemTypes[] = [
     },
   },
   {
-    key: "banners",
-    label: "Banners",
+    key: "carousels",
+    label: "Carousels",
     isTitle: false,
-    url: "/banners",
+    url: "/carousels",
     icon: "ri-gallery-fill",
     badge: {
       variant: "success",
