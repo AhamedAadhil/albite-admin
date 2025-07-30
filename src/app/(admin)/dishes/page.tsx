@@ -83,7 +83,9 @@ export default function DishesPage() {
   return (
     <Container fluid>
       <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h4 className="fw-bold">Dishes ({dishes.length})</h4>
+        <h4 className="fw-bold">
+          <i className="ri-restaurant-2-line me-2"></i>Dishes ({dishes.length})
+        </h4>
         <Button variant="success" onClick={toggleModal}>
           <i className="ri-add-line"></i> Create New Dish
         </Button>

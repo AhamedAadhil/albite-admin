@@ -29,10 +29,10 @@ export default function UserCard({ user: initialUser }: Props) {
     try {
       setLoadingUserId(userId);
 
-      const res = await fetch(`/api/protected/users/${userId}/toggle-verify`, {
+      const res = await fetch(`/api/protected/users/${userId}/toggle-active`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isVerified: !currentState }),
+        body: JSON.stringify({ isActive: !currentState }),
       });
 
       const data = await res.json();
@@ -43,7 +43,7 @@ export default function UserCard({ user: initialUser }: Props) {
       // ✅ Update the local state manually
       setUser((prevUser: any) => ({
         ...prevUser,
-        isVerified: !currentState,
+        isActive: !currentState,
       }));
 
       alert(
@@ -167,11 +167,11 @@ export default function UserCard({ user: initialUser }: Props) {
           <Form.Check
             type="switch"
             id={`toggle-${user._id}`}
-            checked={user.isVerified}
+            checked={user.isActive}
             onChange={() =>
-              handleToggleActive(user._id.toString(), user.isVerified)
+              handleToggleActive(user._id.toString(), user.isActive)
             }
-            label={user.isVerified ? "Enabled" : "Disabled"}
+            label={user.isActive ? "Enabled" : "Disabled"}
             className="text-muted small"
           />
         )}

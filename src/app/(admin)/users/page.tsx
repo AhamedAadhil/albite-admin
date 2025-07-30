@@ -28,6 +28,7 @@ export default function UsersPage() {
   const [isVerified, setIsVerified] = useState(
     searchParams.get("isVerified") || ""
   );
+  const [isActive, setIsActive] = useState(searchParams.get("isActive") || "");
   const [hasCart, setHasCart] = useState(searchParams.get("hasCart") || "");
 
   // Fetch users with filters
@@ -40,6 +41,7 @@ export default function UsersPage() {
       if (q) params.append("q", q);
       if (region) params.append("region", region);
       if (isVerified) params.append("isVerified", isVerified);
+      if (isActive) params.append("isActive", isActive);
       if (hasCart) params.append("hasCart", hasCart);
 
       const res = await fetch(`/api/protected/users?${params.toString()}`);
@@ -57,7 +59,7 @@ export default function UsersPage() {
   // Run on mount or when filters change
   useEffect(() => {
     fetchUsers();
-  }, [q, region, isVerified, hasCart]);
+  }, [q, region, isVerified, isActive, hasCart]);
 
   // Sync filters in URL (optional but good UX)
   const applyFilters = (e: React.FormEvent) => {
@@ -67,6 +69,7 @@ export default function UsersPage() {
     if (q) params.set("q", q);
     if (region) params.set("region", region);
     if (isVerified) params.set("isVerified", isVerified);
+    if (isActive) params.set("isActive", isActive);
     if (hasCart) params.set("hasCart", hasCart);
 
     router.push(`?${params.toString()}`);
@@ -74,7 +77,10 @@ export default function UsersPage() {
 
   return (
     <Container fluid>
-      <h4 className="fw-bold mt-4 mb-3">Users ({users.length})</h4>
+      <h4 className="fw-bold mt-4 mb-3">
+        {" "}
+        <i className="ri-user-line me-2"></i> Users ({users.length})
+      </h4>
 
       {/* Filters */}
       <Form onSubmit={applyFilters} className="mb-4">
@@ -108,6 +114,28 @@ export default function UsersPage() {
               <option value="false">Unverified</option>
             </Form.Select>
           </Col>
+          <Col sm={4} md={2}>
+            <Form.Label>Active</Form.Label>
+            <Form.Select
+              value={isActive}
+              onChange={(e) => setIsActive(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </Form.Select>
+          </Col>
+          {/* <Col sm={4} md={2}>
+            <Form.Label>Active</Form.Label>
+            <Form.Select
+              value={isVerified}
+              onChange={(e) => setIsVerified(e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="true">Verified</option>
+              <option value="false">Unverified</option>
+            </Form.Select>
+          </Col> */}
 
           <Col sm={4} md={2}>
             <Form.Label>Has Cart</Form.Label>

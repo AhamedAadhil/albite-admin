@@ -79,50 +79,51 @@ export default function DishCard({
         <h5 className="card-title fw-semibold text-truncate">{name}</h5>
 
         <p className="mb-1 text-muted small">
-          <i className="ri-price-tag-3-line me-1"></i>Rs. {price.toFixed(2)}
+          <i className="ri-price-tag-3-line me-1 text-primary"></i>Rs.{" "}
+          {price.toFixed(2)}
         </p>
 
         <div className="d-flex flex-wrap justify-content-between small text-muted">
           {calories !== undefined && (
             <span>
-              <i className="ri-fire-line me-1"></i>
+              <i className="ri-fire-line me-1 text-primary"></i>
               {calories} kcal
             </span>
           )}
           {servings !== undefined && (
             <span>
-              <i className="ri-user-line me-1"></i>
+              <i className="ri-user-line me-1 text-primary"></i>
               {servings} servings
             </span>
           )}
           <span>
-            <i className="ri-star-line me-1"></i>
+            <i className="ri-star-line me-1 text-primary"></i>
             {averageRating.toFixed(1)}
           </span>
           <span>
-            <i className="ri-shopping-bag-line me-1"></i>
+            <i className="ri-shopping-bag-line me-1 text-primary"></i>
             {totalOrders} orders
           </span>
         </div>
 
         <div className="d-flex flex-wrap justify-content-between mt-2 small text-muted">
           <span>
-            <i className="ri-restaurant-line me-1"></i>
+            <i className="ri-restaurant-line me-1 text-primary"></i>
             {mainCategory}
           </span>
           <span>
-            <i className="ri-time-line me-1"></i>
+            <i className="ri-time-line me-1 text-primary"></i>
             Before {availableBefore}
           </span>
           <span>
-            <i className="ri-calendar-check-line me-1"></i>
+            <i className="ri-calendar-check-line me-1 text-primary"></i>
             Preorder: {maxPreorderDays}d
           </span>
         </div>
 
         <div className="d-flex justify-content-end mt-3">
           <Button variant="outline-primary" size="sm" onClick={onEdit}>
-            <i className="ri-edit-line me-1"></i>Edit
+            <i className="ri-edit-line me-1 text-primary"></i>Edit
           </Button>
         </div>
       </div>

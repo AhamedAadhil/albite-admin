@@ -36,6 +36,12 @@ export const GET = async (req: NextRequest) => {
       filters.isVerified = isVerified === "true";
     }
 
+    // 2. isActive filter
+    const isActive = searchParams.get("isActive");
+    if (isActive === "true" || isActive === "false") {
+      filters.isActive = isActive === "true";
+    }
+
     // 3. Region filter
     const region = searchParams.get("region");
     if (region) {

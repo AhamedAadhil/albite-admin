@@ -61,6 +61,16 @@ const MENU_ITEMS: MenuItemTypes[] = [
     },
   },
   {
+    key: "specialOrders",
+    label: "Special Orders",
+    isTitle: false,
+    url: "/special-orders",
+    icon: "ri-star-line",
+    badge: {
+      variant: "success",
+    },
+  },
+  {
     key: "users",
     label: "Users",
     isTitle: false,

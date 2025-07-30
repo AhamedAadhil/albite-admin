@@ -17,20 +17,20 @@ export const PATCH = async (
     }
     await connectDB();
     const { userId } = params;
-    const { isVerified } = await req.json();
+    const { isActive } = await req.json();
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { isVerified },
+      { isActive },
       { new: true }
     );
     return NextResponse.json({ updatedUser, success: true }, { status: 200 });
   } catch (error: any) {
-    console.error("Error toggling user verification:", error);
+    console.error("Error toggling user Account:", error);
     return NextResponse.json(
       {
-        error: "Failed to toggle user verification",
+        error: "Failed to toggle user Account",
         message:
-          error.message || "An error occurred while toggling user verification",
+          error.message || "An error occurred while toggling user Account",
         success: false,
       },
       { status: 500 }

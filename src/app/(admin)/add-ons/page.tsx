@@ -54,7 +54,10 @@ export default function AddOnsPage() {
   return (
     <Container fluid className="mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="fw-bold">Add-ons ({filteredAddOns?.length})</h4>
+        <h4 className="fw-bold">
+          <i className="ri-add-circle-line me-2"></i>Add-ons (
+          {filteredAddOns?.length})
+        </h4>
         <Button variant="success" onClick={handleCreateClick}>
           <i className="ri-add-line"></i> Create New Add-on
         </Button>
