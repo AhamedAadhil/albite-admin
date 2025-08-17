@@ -167,7 +167,7 @@ export default function CreateDishModal({ show, onHide }: Props) {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Upload Image</Form.Label>
+            <Form.Label>Upload Image (H:1500 x W:1500 Px)</Form.Label>
             <Form.Control
               type="file"
               accept="image/*"

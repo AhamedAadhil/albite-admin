@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { StringSchema } from "yup";
 
 // 1. Interface
 export interface IDish extends Document {

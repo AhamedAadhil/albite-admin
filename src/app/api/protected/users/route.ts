@@ -4,6 +4,8 @@ import User from "@/models/user";
 import { verifyToken } from "@/helper/isVerified";
 import dayjs from "dayjs";
 
+// Get all users
+// GET /api/protected/users
 export const GET = async (req: NextRequest) => {
   try {
     const user = verifyToken();
@@ -45,7 +47,7 @@ export const GET = async (req: NextRequest) => {
     // 3. Region filter
     const region = searchParams.get("region");
     if (region) {
-      filters.region = region;
+      filters.region = { $regex: region, $options: "i" };
     }
 
     // 4. hasCart filter

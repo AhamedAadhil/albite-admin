@@ -14,7 +14,6 @@ import {
   TabContent,
   TabPane,
 } from "react-bootstrap";
-import UserDetails from "./components/UserDetails";
 import { useEffect, useState } from "react";
 import getInitials from "@/helper/getInitials";
 import { IUser } from "@/models/user";
@@ -22,27 +21,41 @@ import UserOrders from "./components/UserOrders";
 import UserFavorites from "./components/UserFavorites";
 import UserCart from "./components/UserCart";
 import UserReviews from "./components/UserReviews";
+import UserInfo from "./components/UserInfo";
 
 const ProfilePages = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [userData, setUserData] = useState<IUser | null>(null);
+  const [ordersByMonth, setOrdersByMonth] = useState([]);
+  const [categoryDistribution, setCategoryDistribution] = useState([]);
+  const [orderStatusDistribution, setOrderStatusDistribution] = useState([]);
 
   const availableTabs = [];
 
   if (userData?.orders?.length) {
-    availableTabs.push({ key: "orders", label: "Orders" });
+    availableTabs.push({
+      key: "orders",
+      label: `Orders (${userData?.orders?.length})`,
+    });
   }
   if (userData?.favourites?.length) {
-    availableTabs.push({ key: "favorites", label: "Favorites" });
+    availableTabs.push({
+      key: "favorites",
+      label: `Favorites (${userData?.favourites?.length})`,
+    });
   }
   if (userData?.cart) {
-    availableTabs.push({ key: "cart", label: "Cart" });
+    availableTabs.push({
+      key: "cart",
+      label: `Cart (Rs. ${(userData.cart as any).total})`,
+    });
   }
+
   if (userData?.reviews?.length) {
     availableTabs.push({ key: "reviews", label: "Reviews" });
   }
 
-  availableTabs.push({ key: "settings", label: "Settings" }); // always available
+  availableTabs.push({ key: "info", label: "Info" }); // always available
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("viewUser_userId");
@@ -58,6 +71,10 @@ const ProfilePages = () => {
       const response = await fetch(`/api/protected/users/${userId}`);
       const data = await response.json();
       setUserData(data.data);
+      setOrdersByMonth(data.ordersByMonth);
+      setCategoryDistribution(data.categoryDistribution);
+      setOrderStatusDistribution(data.orderStatusDistribution);
+      console.log("User Data:", data.data);
     } catch (err) {
       console.error("Failed to fetch user", err);
     }
@@ -185,9 +202,14 @@ const ProfilePages = () => {
                         <UserReviews reviews={userData?.reviews || []} />
                       </TabPane>
 
-                      {/* <TabPane eventKey="settings">
-    <UserSettings user={userData} />
-  </TabPane> */}
+                      <TabPane eventKey="info">
+                        <UserInfo
+                          userData={userData}
+                          ordersByMonth={ordersByMonth}
+                          categoryDistribution={categoryDistribution}
+                          orderStatusDistribution={orderStatusDistribution}
+                        />
+                      </TabPane>
                     </TabContent>
                   </TabContainer>
                 </div>

@@ -1,4 +1,6 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
+import { ICart } from "./cart";
+import { IOrder } from "./order";
 
 // 1. Interface
 export interface IUser extends Document {
@@ -17,12 +19,12 @@ export interface IUser extends Document {
   totalSpent: number;
   points: number;
 
-  orders: mongoose.Types.ObjectId[];
-  cart: mongoose.Types.ObjectId;
+  orders: (mongoose.Types.ObjectId | IOrder)[];
+  cart: mongoose.Types.ObjectId | ICart;
   favourites: mongoose.Types.ObjectId[];
   reviews: mongoose.Types.ObjectId[];
 
-  isActive: boolean;
+  isActive?: boolean;
 
   createdAt: Date;
   updatedAt: Date;
@@ -99,17 +101,15 @@ const userSchema = new Schema<IUser>(
       },
     ],
 
-    cart: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Cart",
-      },
-    ],
+    cart: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cart",
+    },
 
     favourites: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "Dish",
       },
     ],
 
@@ -119,6 +119,7 @@ const userSchema = new Schema<IUser>(
         ref: "Review",
       },
     ],
+
     isActive: {
       type: Boolean,
       default: true,

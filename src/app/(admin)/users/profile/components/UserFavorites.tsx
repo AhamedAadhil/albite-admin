@@ -8,7 +8,7 @@ export default function UserFavorites({ favorites }: { favorites: any[] }) {
 
   return (
     <div>
-      <h5 className="mb-3">Favorite Products</h5>
+      <h5 className="mb-3">Favorite Dishes</h5>
       <Row xs={1} sm={2} md={3} lg={4} className="g-4">
         {favorites.map((item) => (
           <Col key={item._id}>

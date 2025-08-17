@@ -6,7 +6,7 @@ export type MenuItemTypes = {
   url?: string;
   badge?: {
     variant: string;
-    text?: string;
+    text: string;
   };
   logout?: boolean;
   parentKey?: string;
@@ -26,9 +26,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/",
     icon: "ri-dashboard-3-line",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "dishes",
@@ -36,9 +36,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/dishes",
     icon: "ri-restaurant-2-line",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "addons",
@@ -46,9 +46,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/add-ons",
     icon: "ri-add-circle-line",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "orders",
@@ -56,9 +56,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/orders",
     icon: "ri-file-list-3-line",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "specialOrders",
@@ -66,9 +66,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/special-orders",
     icon: "ri-star-line",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "users",
@@ -76,9 +76,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/users",
     icon: "ri-user-line",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "carousels",
@@ -86,9 +86,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/carousels",
     icon: "ri-gallery-fill",
-    badge: {
-      variant: "success",
-    },
+    // badge: {
+    //   variant: "success",
+    // },
   },
   {
     key: "authentication",
@@ -101,9 +101,9 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: false,
     url: "/",
     icon: "ri-logout-box-r-line",
-    badge: {
-      variant: "danger",
-    },
+    // badge: {
+    //   variant: "danger",
+    // },
     logout: true,
   },
   {
