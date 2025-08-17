@@ -204,6 +204,7 @@ const ProfilePages = () => {
 
                       <TabPane eventKey="info">
                         <UserInfo
+                          refetch={fetchUserDetails}
                           userData={userData}
                           ordersByMonth={ordersByMonth}
                           categoryDistribution={categoryDistribution}

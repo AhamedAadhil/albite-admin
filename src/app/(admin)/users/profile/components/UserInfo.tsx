@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Table } from "react-bootstrap";
 import {
   BarChart,
@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 interface IUserInfoProps {
+  refetch: any;
   userData: any; // IUser plus extended analytics: ordersByMonth, categoryDistribution, orderStatusDistribution
   ordersByMonth: {
     _id: { year: number; month: number };
@@ -28,11 +29,47 @@ interface IUserInfoProps {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#AA336A"];
 
 const UserInfo: React.FC<IUserInfoProps> = ({
+  refetch,
   userData,
   ordersByMonth,
   categoryDistribution,
   orderStatusDistribution,
 }) => {
+  // Local state for points input
+  const [pointsInput, setPointsInput] = useState(userData?.points || 0);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  // Function to call backend API to update points
+  const handleUpdatePoints = async () => {
+    setLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      const response = await fetch(
+        `/api/protected/users/${userData._id}/update-points`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ points: pointsInput }),
+        }
+      );
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to update points");
+      }
+      setSuccessMsg("Points updated successfully!");
+      if (refetch) {
+        refetch();
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Error updating points");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Prepare orders per month data
   const chartOrdersByMonth = useMemo(() => {
     return ordersByMonth?.map((item) => {
@@ -148,6 +185,28 @@ const UserInfo: React.FC<IUserInfoProps> = ({
           </PieChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Update users points */}
+      <h5 className="mt-4">Update User Points</h5>
+      <div className="d-flex align-items-center mb-3">
+        <input
+          type="number"
+          className="form-control me-2"
+          style={{ maxWidth: "150px" }}
+          value={pointsInput}
+          onChange={(e) => setPointsInput(Number(e.target.value))}
+          disabled={loading}
+        />
+        <button
+          className="btn btn-primary"
+          onClick={handleUpdatePoints}
+          disabled={loading}
+        >
+          {loading ? "Updating..." : "Update Points"}
+        </button>
+      </div>
+      {errorMsg && <div className="text-danger mb-2">{errorMsg}</div>}
+      {successMsg && <div className="text-success mb-2">{successMsg}</div>}
     </div>
   );
 };
