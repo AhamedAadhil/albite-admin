@@ -160,6 +160,218 @@ export async function GET(req: NextRequest) {
       dishesServedUntilYesterday
     );
 
+    // 1. Total Revenue Over Time (daily for last 30 days)
+    const revenueOverTimeAgg = await Order.aggregate([
+      {
+        $match: {
+          status: "delivered",
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+          dailyRevenue: { $sum: "$total" },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]);
+    const revenueOverTime = revenueOverTimeAgg.map((item) => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(
+        2,
+        "0"
+      )}-${String(item._id.day).padStart(2, "0")}`,
+      revenue: item.dailyRevenue,
+    }));
+
+    // 2. Number of Orders Over Time (daily for last 30 days)
+    const ordersOverTimeAgg = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+          dailyOrders: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]);
+    const ordersOverTime = ordersOverTimeAgg.map((item) => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(
+        2,
+        "0"
+      )}-${String(item._id.day).padStart(2, "0")}`,
+      orders: item.dailyOrders,
+    }));
+
+    // 3. Order Status Distribution
+    const orderStatusAgg = await Order.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const orderStatusDistribution = orderStatusAgg.map((item) => ({
+      status: item._id,
+      count: item.count,
+    }));
+
+    // 4. Dishes Sold Breakdown (top 10 dishes by quantity)
+    const dishesSoldAgg = await Order.aggregate([
+      {
+        $match: { status: "delivered" }, // Only delivered orders considered
+      },
+      { $unwind: "$dishes" },
+      {
+        $group: {
+          _id: "$dishes.dish",
+          quantitySold: { $sum: "$dishes.quantity" },
+        },
+      },
+      {
+        $lookup: {
+          from: "dishes",
+          localField: "_id",
+          foreignField: "_id",
+          as: "dishInfo",
+        },
+      },
+      { $unwind: "$dishInfo" },
+      { $sort: { quantitySold: -1 } },
+      { $limit: 10 },
+    ]);
+
+    const dishesSoldBreakdown = dishesSoldAgg.map((item) => ({
+      dishName: item.dishInfo.name || "Unknown",
+      quantitySold: item.quantitySold,
+    }));
+
+    // 5. Delivery Method Distribution
+    const deliveryMethodAgg = await Order.aggregate([
+      {
+        $group: {
+          _id: "$deliveryMethod",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const deliveryMethodDistribution = deliveryMethodAgg.map((item) => ({
+      deliveryMethod: item._id,
+      count: item.count,
+    }));
+
+    // 6. Discount vs Revenue Comparison (daily for last 30 days)
+    const discountRevenueAgg = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+          dailyDiscount: { $sum: "$discount" },
+          dailyRevenue: { $sum: "$total" },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]);
+    const discountVsRevenue = discountRevenueAgg.map((item) => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(
+        2,
+        "0"
+      )}-${String(item._id.day).padStart(2, "0")}`,
+      discount: item.dailyDiscount,
+      revenue: item.dailyRevenue,
+    }));
+
+    // 7. Points Earned and Used by Customers (last 30 days)
+    const pointsAgg = await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+          earnedPoints: { $sum: "$earnedPoints" },
+          usedPoints: { $sum: "$usedPoints" },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]);
+    const pointsOverTime = pointsAgg.map((item) => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(
+        2,
+        "0"
+      )}-${String(item._id.day).padStart(2, "0")}`,
+      earnedPoints: item.earnedPoints,
+      usedPoints: item.usedPoints,
+    }));
+
+    // 8. Order Processing Time (average intervals between statuses)
+    // Calculate average time from placed to accepted, accepted to prepared, prepared to delivered
+    const statusTimesAgg = await Order.aggregate([
+      {
+        $match: {
+          isPlaced: true,
+          isAccepted: true,
+          isPrepared: true,
+          isDelivered: true,
+        },
+      },
+      {
+        $project: {
+          placedToAccepted: { $subtract: ["$acceptedTime", "$placedTime"] },
+          acceptedToPrepared: { $subtract: ["$preparedTime", "$acceptedTime"] },
+          preparedToDelivered: {
+            $subtract: ["$deliveredTime", "$preparedTime"],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          avgPlacedToAccepted: { $avg: "$placedToAccepted" },
+          avgAcceptedToPrepared: { $avg: "$acceptedToPrepared" },
+          avgPreparedToDelivered: { $avg: "$preparedToDelivered" },
+        },
+      },
+    ]);
+    const processingTimes =
+      statusTimesAgg.length > 0
+        ? {
+            avgPlacedToAcceptedMinutes:
+              statusTimesAgg[0].avgPlacedToAccepted / (1000 * 60),
+            avgAcceptedToPreparedMinutes:
+              statusTimesAgg[0].avgAcceptedToPrepared / (1000 * 60),
+            avgPreparedToDeliveredMinutes:
+              statusTimesAgg[0].avgPreparedToDelivered / (1000 * 60),
+          }
+        : null;
+
     return NextResponse.json({
       stats: {
         users: {
@@ -181,6 +393,16 @@ export async function GET(req: NextRequest) {
           total: revenueUntilNow,
           growthToday: revenueGrowthToday,
           growthPercent: revenueGrowthPercent,
+        },
+        reports: {
+          revenueOverTime,
+          ordersOverTime,
+          orderStatusDistribution,
+          dishesSoldBreakdown,
+          deliveryMethodDistribution,
+          discountVsRevenue,
+          pointsOverTime,
+          processingTimes,
         },
       },
       success: true,

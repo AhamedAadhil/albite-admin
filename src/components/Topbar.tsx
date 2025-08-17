@@ -1,3 +1,4 @@
+"use client";
 // assets
 import logo from "@/assets/images/logo.png";
 import logoSm from "@/assets/images/logo-sm.png";
@@ -18,7 +19,8 @@ import NotificationDropdown from "./layouts/topbar/NotificationDropdown";
 import ProfileDropdown from "./layouts/topbar/ProfileDropdown";
 import useViewport from "@/hooks/useViewPort";
 import { useThemeCustomizer } from "./ThemeCustomizer";
-import { useGetSMSBalance } from "@/hooks/useGetInsights";
+import { useGetSMSBalance } from "@/hooks/useGetSMSBalance";
+import { useState } from "react";
 /**
  * for subtraction minutes
  */
@@ -170,6 +172,20 @@ const Topbar = ({ toggleMenu, navOpen }: TopbarProps) => {
   const { width } = useViewport();
   const { data, error } = useGetSMSBalance();
 
+  const [showDrawer, setShowDrawer] = useState(false);
+
+  const remainingUnits =
+    data?.data?.data?.remaining_balance?.split(" ")[1] || "0";
+
+  const isPositive = Number(remainingUnits) > 0;
+
+  const bankDetails = {
+    holderName: "John Doe",
+    accountNumber: "1234 5678 9012 3456",
+    bank: "Example Bank",
+    branch: "Main Branch",
+  };
+
   /**
    * Toggle the leftmenu when having mobile screen
    */
@@ -304,10 +320,100 @@ const Topbar = ({ toggleMenu, navOpen }: TopbarProps) => {
             {/* <li className="dropdown">
 							<LanguageDropdown />
 						</li> */}
-            <li>
-              <i className="ri-message-2-line"></i> SMS units Remaining:{" "}
-              {data?.data?.data?.remaining_balance?.split(" ")[1]}
-            </li>
+
+            {/*SMS BALANCE  */}
+            {isPositive && (
+              <>
+                <li
+                  style={{
+                    cursor: "pointer",
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                  onClick={() => setShowDrawer(true)}
+                >
+                  <i className="ri-message-2-line fs-22" />
+                  <span style={{ marginLeft: 6 }}>
+                    SMS units Remaining:{" "}
+                    <span className="noti-icon-badge badge text-bg-pink fs-12">
+                      {remainingUnits}
+                    </span>
+                  </span>
+                </li>
+
+                {showDrawer && (
+                  <>
+                    {/* Backdrop fixed on whole screen */}
+                    <div
+                      onClick={() => setShowDrawer(false)}
+                      style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        width: "100vw",
+                        height: "100vh",
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        zIndex: 999,
+                        cursor: "pointer",
+                      }}
+                    />
+
+                    {/* Drawer positioned relative to viewport (fixed or absolute somewhere) */}
+                    <div
+                      style={{
+                        position: "absolute", // Or fixed if you'd like it to scroll with viewport
+                        top: "50px", // Adjust depending on your layout
+                        left: "10px", // Adjust to be under the <li> element properly
+                        width: "320px",
+                        padding: "20px",
+                        borderRadius: "8px",
+                        background: "#f4f4f4",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                        zIndex: 1000,
+                        maxWidth: "90vw",
+                      }}
+                    >
+                      <button
+                        style={{
+                          position: "absolute",
+                          top: "10px",
+                          right: "15px",
+                          background: "transparent",
+                          border: "none",
+                          fontSize: "18px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setShowDrawer(false)}
+                        aria-label="Close"
+                      >
+                        ×
+                      </button>
+                      <h5 style={{ marginBottom: "15px" }}>
+                        Bank Account Details For Recharge
+                      </h5>
+                      <div>
+                        <div>
+                          <strong>Account Holder Name:</strong>{" "}
+                          {bankDetails.holderName}
+                        </div>
+                        <div>
+                          <strong>Account Number:</strong>{" "}
+                          {bankDetails.accountNumber}
+                        </div>
+                        <div>
+                          <strong>Bank:</strong> {bankDetails.bank}
+                        </div>
+                        <div>
+                          <strong>Branch:</strong> {bankDetails.branch}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
             {/* <li className="dropdown notification-list">
               <MessageDropdown
               remaining_balance={

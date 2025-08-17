@@ -1,17 +1,22 @@
 "use client";
 import { Col, Row } from "react-bootstrap";
-import ChatList from "./ChatList";
-import Projects from "./Projects";
 import Statistics from "./Statistics";
-import WeeklySalesChart from "./WeeklySalesChart";
-import YearlySalesChart from "./YearlySalesChart";
-
 // data
 import PageBreadcrumb from "@/components/PageBreadcrumb";
-import { chatMessages } from "./data";
 import { useState, useEffect } from "react";
+import {
+  DeliveryMethodPieChart,
+  DiscountVsRevenueChart,
+  DishesSoldBreakdownChart,
+  OrdersOverTimeChart,
+  OrderStatusPieChart,
+  PointsOverTimeChart,
+  ProcessingTimesChart,
+  RevenueOverTime,
+} from "./charts";
 
 interface InsightsData {
+  reports: any;
   stats: any;
   users: {
     total: number;
@@ -57,6 +62,8 @@ const Dashboard = () => {
   if (!data) {
     return <div>Loading...</div>;
   }
+
+  console.log(data, "data");
 
   // Construct statistics array with fetched data
   // TODO: modifyt
@@ -111,22 +118,51 @@ const Dashboard = () => {
           })}
       </Row>
 
+      {/* Revenue and Orders (trend and distribution) */}
       <Row>
-        <Col lg={8}>
-          <WeeklySalesChart />
+        <Col lg={7}>
+          <RevenueOverTime data={data?.stats?.reports?.revenueOverTime} />
         </Col>
-        <Col lg={4}>
-          <YearlySalesChart />
+        <Col lg={5}>
+          <OrdersOverTimeChart data={data?.stats?.reports?.ordersOverTime} />
         </Col>
       </Row>
 
-      <Row>
-        <Col xl={4}>
-          <ChatList messages={chatMessages} />
+      {/* Pie charts for proportions */}
+      <Row className="mt-4">
+        <Col lg={4}>
+          <OrderStatusPieChart
+            data={data?.stats?.reports?.orderStatusDistribution}
+          />
         </Col>
+        <Col lg={4}>
+          <DeliveryMethodPieChart
+            data={data?.stats?.reports?.deliveryMethodDistribution}
+          />
+        </Col>
+        <Col lg={4}>
+          <PointsOverTimeChart data={data?.stats?.reports?.pointsOverTime} />
+        </Col>
+      </Row>
 
-        <Col xl={8}>
-          <Projects />
+      {/* Detailed comparison and breakdown */}
+      <Row className="mt-4">
+        <Col lg={6}>
+          <DiscountVsRevenueChart
+            data={data?.stats?.reports?.discountVsRevenue}
+          />
+        </Col>
+        <Col lg={6}>
+          <DishesSoldBreakdownChart
+            data={data?.stats?.reports?.dishesSoldBreakdown}
+          />
+        </Col>
+      </Row>
+
+      {/* Processing times - narrow vertical space */}
+      <Row className="mt-4">
+        <Col lg={12}>
+          <ProcessingTimesChart data={data?.stats?.reports?.processingTimes} />
         </Col>
       </Row>
     </>

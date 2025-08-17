@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import Link from "next/link";
-import { useGetSMSBalance } from "@/hooks/useGetInsights";
+import { useGetSMSBalance } from "@/hooks/useGetSMSBalance";
 
 const MessageDropdown = async () => {
   const [dropDownOpen, setDropDownOpen] = useState<boolean>(false);
