@@ -1,4 +1,5 @@
 import connectDB from "@/config/db";
+import { createNotification } from "@/helper/createNotification";
 import { verifyToken } from "@/helper/isVerified";
 import { User } from "@/models";
 import { NextRequest, NextResponse } from "next/server";
@@ -30,6 +31,12 @@ export const PATCH = async (
         { status: 404 }
       );
     }
+    await createNotification({
+      recipientId: userId,
+      recipientType: "User",
+      type: "Points Updated",
+      message: `Congratulations! Your Albite loyalty points total is now ${points}. Enjoy exclusive perks as a valued member.`,
+    });
     return NextResponse.json({ updatedUser, success: true }, { status: 200 });
   } catch (error: any) {
     console.error(error.message);

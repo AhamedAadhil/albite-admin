@@ -3,6 +3,8 @@ import connectDB from "@/config/db";
 import { User, Cart, Dish, AddOn, Order } from "@/models";
 import { verifyToken } from "@/helper/isVerified";
 import mongoose from "mongoose";
+import { createNotification } from "@/helper/createNotification";
+import { getOrderStatusMessage } from "@/helper/getOrderStatusMessage";
 
 // GET /api/protected/orders
 export const GET = async (req: NextRequest) => {
@@ -161,6 +163,21 @@ export const PATCH = async (req: NextRequest, res: NextResponse) => {
     const updatedOrder = await Order.findByIdAndUpdate(orderId, updateData, {
       new: true,
     });
+
+    const userId =
+      typeof order.userId === "string"
+        ? order.userId
+        : order.userId instanceof mongoose.Types.ObjectId
+        ? order.userId
+        : order.userId || order.userId;
+
+    await createNotification({
+      message: getOrderStatusMessage(order.orderId, newStatus, rejectionReason),
+      type: "orderStatusUpdate",
+      recipientType: "User",
+      recipientId: userId,
+    });
+
     return NextResponse.json({
       message: "Order status updated successfully",
       success: true,
