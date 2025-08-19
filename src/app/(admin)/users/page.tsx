@@ -19,6 +19,9 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [showDormant, setShowDormant] = useState(false);
+  const [dormantDays, setDormantDays] = useState(60);
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -44,6 +47,10 @@ export default function UsersPage() {
       if (isActive) params.append("isActive", isActive);
       if (hasCart) params.append("hasCart", hasCart);
 
+      if (showDormant) {
+        params.append("dormantDays", dormantDays.toString());
+      }
+
       const res = await fetch(`/api/protected/users?${params.toString()}`);
       const data = await res.json();
 
@@ -59,7 +66,7 @@ export default function UsersPage() {
   // Run on mount or when filters change
   useEffect(() => {
     fetchUsers();
-  }, [q, region, isVerified, isActive, hasCart]);
+  }, [q, region, isVerified, isActive, hasCart, showDormant, dormantDays]);
 
   // Sync filters in URL (optional but good UX)
   const applyFilters = (e: React.FormEvent) => {
@@ -71,6 +78,7 @@ export default function UsersPage() {
     if (isVerified) params.set("isVerified", isVerified);
     if (isActive) params.set("isActive", isActive);
     if (hasCart) params.set("hasCart", hasCart);
+    if (showDormant) params.set("dormantDays", dormantDays.toString());
 
     router.push(`?${params.toString()}`);
   };
@@ -154,6 +162,36 @@ export default function UsersPage() {
               Apply
             </Button>
           </Col> */}
+
+          <Form.Group className="mb-3 d-flex align-items-center gap-3">
+            <Form.Check
+              type="checkbox"
+              id="dormantFilter"
+              label="Show Dormant Users"
+              checked={showDormant}
+              onChange={(e) => {
+                setShowDormant(e.target.checked);
+                // setPage(1);
+              }}
+            />
+
+            {showDormant && (
+              <Form.Control
+                type="number"
+                min={1}
+                max={365}
+                value={dormantDays}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  if (val > 0) setDormantDays(val);
+                  // setPage(1);
+                }}
+                style={{ width: "100px" }}
+                aria-label="Dormant days threshold"
+                placeholder="Days"
+              />
+            )}
+          </Form.Group>
         </Row>
       </Form>
 

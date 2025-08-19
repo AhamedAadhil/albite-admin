@@ -52,7 +52,10 @@ const ProfilePages = () => {
   }
 
   if (userData?.reviews?.length) {
-    availableTabs.push({ key: "reviews", label: "Reviews" });
+    availableTabs.push({
+      key: "reviews",
+      label: `Reviews (${userData?.reviews?.length})`,
+    });
   }
 
   availableTabs.push({ key: "info", label: "Info" }); // always available

@@ -1,6 +1,6 @@
 import connectDB from "@/config/db";
 import { verifyToken } from "@/helper/isVerified";
-import { User, Cart, Dish, AddOn, Order } from "@/models";
+import { User, Cart, Dish, AddOn, Order, Review } from "@/models";
 import mongoose from "mongoose";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -46,6 +46,7 @@ export const GET = async (
           { path: "dishes.dish", model: "Dish" },
           { path: "addons.addon", model: "AddOn" },
         ],
+        options: { sort: { createdAt: -1 } },
       })
       .populate({
         path: "favourites",
@@ -53,8 +54,12 @@ export const GET = async (
         // ✅ Optionally populate nested fields in favourite dishes if needed
         select: "name image price isPopular isRecommended mainCategory",
       })
+      .populate({
+        path: "reviews",
+        model: "Review",
+        options: { sort: { createdAt: -1 } }, // optional sort to get recent reviews first
+      })
       .sort({ createdAt: -1 });
-
     if (!singleUser) {
       return NextResponse.json(
         { message: "User not found", success: false },

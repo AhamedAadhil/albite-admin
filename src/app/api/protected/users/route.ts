@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/config/db";
-import User from "@/models/user";
 import { verifyToken } from "@/helper/isVerified";
 import dayjs from "dayjs";
+import { User, Order } from "@/models";
 
 // Get all users
 // GET /api/protected/users
@@ -71,6 +71,23 @@ export const GET = async (req: NextRequest) => {
       filters.createdAt = {};
       if (from) filters.createdAt.$gte = new Date(from);
       if (to) filters.createdAt.$lte = dayjs(to).endOf("day").toDate();
+    }
+
+    // 7. Dormant users
+    const dormantDays = searchParams.get("dormantDays");
+    if (dormantDays) {
+      // Get the cutoff date
+      const dormantSince = dayjs()
+        .subtract(Number(dormantDays), "day")
+        .toDate();
+
+      // Find user IDs with orders after 'dormantSince'
+      const activeUserIds = await Order.distinct("userId", {
+        placedTime: { $gte: dormantSince },
+      });
+
+      // Only users NOT in activeUserIds (i.e., have NOT ordered recently)
+      filters._id = { $nin: activeUserIds };
     }
 
     const users = await User.find(filters).sort({ createdAt: -1 });

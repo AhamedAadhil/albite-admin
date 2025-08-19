@@ -4,6 +4,8 @@ import { formatDateTime } from "@/helper/formatDateTime";
 import React, { useEffect, useState } from "react";
 import classNames from "classnames";
 import { OrderDetailsModal } from "@/components/modal/OrderDetailsModal";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 type DishInfo = {
   dish: any;
@@ -193,6 +195,134 @@ const OrdersPage: React.FC = () => {
     );
   };
 
+  async function handlePrint(order: any) {
+    // Format placed date
+    const placedDate = order.placedTime
+      ? new Date(order.placedTime).toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+      : "N/A";
+
+    // Group addons by dish based on no direct link in your example,
+    // so just list all addons after dishes (no per-dish linkage)
+    const dishesHtml = order.dishes
+      .map((dish: any) => `${dish.quantity} x ${dish.dish.name}`)
+      .join("<br>");
+
+    // List all addons with quantities (grouped by addon name and summed quantity)
+    const addonMap: Record<string, number> = {};
+    order.addons.forEach(({ addon, quantity }: any) => {
+      if (addon.name in addonMap) {
+        addonMap[addon.name] += quantity;
+      } else {
+        addonMap[addon.name] = quantity;
+      }
+    });
+    const addonsHtml = Object.entries(addonMap)
+      .map(([name, qty]) => `+ ${qty} x ${name}`)
+      .join("<br>");
+
+    // Total quantity of dishes
+    const totalQtyDishes = order.dishes.reduce(
+      (sum: any, d: { quantity: any }) => sum + d.quantity,
+      0
+    );
+
+    // Total quantity of addons
+    const totalQtyAddons = order.addons.reduce(
+      (sum: any, d: { quantity: any }) => sum + d.quantity,
+      0
+    );
+
+    const kotHtml = `
+    <div style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; width: 80mm; padding: 8px; font-size: 14px; white-space: pre-line;">
+      <div style="text-align:center; font-weight:bold; margin-bottom: 8px;">
+        APP ORDER INFO
+      </div>
+      --------------------------------<br>
+      Order ID: ${order.orderId}<br>
+      Dish Quantity: ${totalQtyDishes}<br>
+      Addons Quantity: ${totalQtyAddons}<br>
+      Placed Date: ${placedDate}<br>
+      --------------------------------<br>
+      ${dishesHtml}
+      ${addonsHtml ? "<br>" + addonsHtml : ""}
+      <br>--------------------------------<br>
+      --- END OF KOT ---
+    </div>
+  `;
+
+    const printWindow = window.open("", "_blank", "width=400,height=600");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>KOT Print - Order ${order.orderId}</title>
+        <style>
+          @media print {
+            body {
+              width: 80mm;
+              margin: 0;
+              padding: 8px;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              font-size: 14px;
+              white-space: pre-line;
+              -webkit-print-color-adjust: exact;
+              color-adjust: exact;
+            }
+            div {
+              margin-bottom: 4px;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        ${kotHtml}
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  }
+
+  async function handleExportExcel(event: any) {
+    const exportData = orders.map((order) => ({
+      "Order ID": order.orderId,
+      User:
+        typeof order.userId === "string"
+          ? order.userId
+          : order.userId?.name || order.userId?.email || "N/A",
+      "Delivery Region": order.deliveryRegion,
+      Method: order.deliveryMethod,
+      Status: order.status,
+      "Placed Time": order.placedTime
+        ? formatDateTime(order.placedTime)
+        : "N/A",
+      "Total (Rs.)": order.total.toFixed(2),
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, "orders.xlsx");
+  }
+
   return (
     <div
       className="container mt-4"
@@ -205,8 +335,17 @@ const OrdersPage: React.FC = () => {
         <h2 className="fw-bold m-0">
           <i className="ri-box-1-line me-2"></i> Orders Dashboard
         </h2>
-        <span className="text-muted">
-          <span>last update: {formatDateTime(lastUpdate)}</span>{" "}
+        <span className="text-muted d-flex align-items-center gap-2">
+          <span>last update: {formatDateTime(lastUpdate)}</span>
+
+          <button
+            type="button"
+            className="btn btn-outline-success"
+            onClick={handleExportExcel}
+            aria-label="Export to Excel"
+          >
+            <i className="ri-file-excel-2-line me-1"></i> Export Excel
+          </button>
           <button
             type="button"
             className="btn btn-outline-primary"
@@ -440,13 +579,23 @@ const OrdersPage: React.FC = () => {
                     {order.total.toFixed(2)}
                   </td>
                   <td>
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-primary"
-                      onClick={() => openModalForOrder(order)}
-                    >
-                      View
-                    </button>
+                    <div className="d-flex gap-2">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary"
+                        onClick={() => openModalForOrder(order)}
+                      >
+                        View
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={() => handlePrint(order)}
+                        aria-label={`Print order ${order.orderId}`}
+                      >
+                        <i className="ri-printer-line me-1"></i> Print
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
