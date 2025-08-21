@@ -21,6 +21,7 @@ import useViewport from "@/hooks/useViewPort";
 import { useThemeCustomizer } from "./ThemeCustomizer";
 import { useGetSMSBalance } from "@/hooks/useGetSMSBalance";
 import { useState } from "react";
+import { useGetNotifications } from "@/hooks/useGetNotifications";
 /**
  * for subtraction minutes
  */
@@ -37,6 +38,8 @@ export type MessageItem = {
 };
 
 export type NotificationItem = {
+  type: any;
+  message: string;
   id: number;
   title: string;
   icon: string;
@@ -49,91 +52,7 @@ export type ProfileOption = {
   icon: string;
   redirectTo: string;
 };
-const Messages: MessageItem[] = [
-  {
-    id: 1,
-    name: "Cristina Pride",
-    subText: "Hi, How are you? What about our next meeting",
-    avatar: avatar1,
-    createdAt: subtractHours(new Date(), 1440),
-  },
-  {
-    id: 2,
-    name: "Sam Garret",
-    subText: "Yeah everything is fine",
-    avatar: avatar2,
-    createdAt: subtractHours(new Date(), 2880),
-  },
-  {
-    id: 3,
-    name: "Karen Robinson",
-    subText: "Wow that's great",
-    avatar: avatar3,
-    createdAt: subtractHours(new Date(), 2880),
-  },
-  {
-    id: 4,
-    name: "Sherry Marshall",
-    subText: "Hi, How are you? What about our next meeting",
-    avatar: avatar4,
-    createdAt: subtractHours(new Date(), 4320),
-  },
-  {
-    id: 5,
-    name: "Shawn Millard",
-    subText: "Yeah everything is fine",
-    avatar: avatar5,
-    createdAt: subtractHours(new Date(), 5760),
-  },
-];
 
-/**
- * notification items
- */
-const Notifications: NotificationItem[] = [
-  {
-    id: 1,
-    title: "Caleb Flakelar commented on Admin",
-    icon: "mdi mdi-comment-account-outline",
-    variant: "primary",
-    createdAt: subtractHours(new Date(), 1),
-  },
-  {
-    id: 2,
-    title: "New user registered.",
-    icon: "mdi mdi-account-plus",
-    variant: "warning",
-    createdAt: subtractHours(new Date(), 300),
-  },
-  {
-    id: 3,
-    title: "Carlos Crouch liked",
-    icon: "mdi mdi-heart",
-    variant: "danger",
-    createdAt: subtractHours(new Date(), 4320),
-  },
-  {
-    id: 4,
-    title: "Caleb Flakelar commented on Admi",
-    icon: "mdi mdi-comment-account-outline",
-    variant: "pink",
-    createdAt: subtractHours(new Date(), 5760),
-  },
-  {
-    id: 5,
-    title: "New user registered.",
-    icon: "mdi mdi-account-plus",
-    variant: "purple",
-    createdAt: subtractHours(new Date(), 10960),
-  },
-  {
-    id: 6,
-    title: "Carlos Crouch liked Admin",
-    icon: "mdi mdi-heart",
-    variant: "success",
-    createdAt: subtractHours(new Date(), 10960),
-  },
-];
 const profileMenus: ProfileOption[] = [
   {
     label: "My Account",
@@ -171,6 +90,11 @@ const Topbar = ({ toggleMenu, navOpen }: TopbarProps) => {
   const { sideBarType } = useThemeCustomizer();
   const { width } = useViewport();
   const { data, error } = useGetSMSBalance();
+  const {
+    notifications,
+    error: notificationError,
+    refetchNotifications,
+  } = useGetNotifications();
 
   const [showDrawer, setShowDrawer] = useState(false);
 
@@ -184,6 +108,10 @@ const Topbar = ({ toggleMenu, navOpen }: TopbarProps) => {
     accountNumber: "1234 5678 9012 3456",
     bank: "Example Bank",
     branch: "Main Branch",
+  };
+
+  const refreshNotifications = async () => {
+    await refetchNotifications();
   };
 
   /**
@@ -422,7 +350,10 @@ const Topbar = ({ toggleMenu, navOpen }: TopbarProps) => {
               />
             </li> */}
             <li className="dropdown notification-list">
-              <NotificationDropdown notifications={Notifications} />
+              <NotificationDropdown
+                notifications={notifications}
+                onNotificationsCleared={refreshNotifications}
+              />
             </li>
             {/* <li className="d-none d-sm-inline-block">
               <button className="nav-link" onClick={handleRightSideBar}>
