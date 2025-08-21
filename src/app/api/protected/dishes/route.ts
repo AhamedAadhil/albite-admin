@@ -29,12 +29,20 @@ export const GET = async (req: NextRequest) => {
     const isPopular = searchParams.get("isPopular");
     const isNewDish = searchParams.get("isNewDish");
     const isActive = searchParams.get("isActive");
+    const deliveryMethod = searchParams.get("deliveryMethod");
 
     if (mainCategory) filters.mainCategory = mainCategory;
     if (isRecommended) filters.isRecommended = isRecommended === "true";
     if (isPopular) filters.isPopular = isPopular === "true";
     if (isNewDish) filters.isNewDish = isNewDish === "true";
     if (isActive) filters.isActive = isActive === "true";
+    if (deliveryMethod) {
+      if (deliveryMethod === "takeaway") {
+        filters.deliveryMethod = "takeaway";
+      } else if (deliveryMethod === "delivery") {
+        filters.deliveryMethod = "delivery";
+      }
+    }
 
     const dishes = await Dish.find(filters).sort({ createdAt: -1 });
 

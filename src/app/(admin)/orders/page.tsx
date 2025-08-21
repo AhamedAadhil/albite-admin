@@ -70,7 +70,7 @@ const OrdersPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(20);
+  const [limit] = useState(40);
   const [totalPages, setTotalPages] = useState(1);
   const [sortField, setSortField] = useState("placedTime");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -83,6 +83,9 @@ const OrdersPage: React.FC = () => {
   // Date filters state
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+
+  // DeliveryType Filter
+  const [deliveryMethod, setDeliveryMethod] = useState<string>("");
 
   const openModalForOrder = (order: Order) => {
     setSelectedOrder(order);
@@ -100,7 +103,7 @@ const OrdersPage: React.FC = () => {
     newStatus: string,
     rejectionReason: string
   ) => {
-    console.log("handleStatusChange", orderId, newStatus, rejectionReason);
+    // console.log("handleStatusChange", orderId, newStatus, rejectionReason);
     const response = await fetch(`/api/protected/orders`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -121,6 +124,7 @@ const OrdersPage: React.FC = () => {
     if (statusFilter.length) params.append("status", statusFilter.join(","));
     if (startDate) params.append("startDate", startDate);
     if (endDate) params.append("endDate", endDate);
+    if (deliveryMethod) params.append("deliveryMethod", deliveryMethod);
     params.append("page", page.toString());
     params.append("limit", limit.toString());
     params.append("sortField", sortField);
@@ -154,7 +158,16 @@ const OrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [search, statusFilter, startDate, endDate, page, sortField, sortOrder]);
+  }, [
+    search,
+    statusFilter,
+    startDate,
+    endDate,
+    page,
+    sortField,
+    sortOrder,
+    deliveryMethod,
+  ]);
 
   // Toggle status filter helper
   const toggleStatusFilter = (status: string) => {
@@ -399,6 +412,55 @@ const OrdersPage: React.FC = () => {
             </label>
           </div>
         ))}
+      </div>
+
+      {/* Delivery type Filter */}
+      <div className="mb-4">
+        <strong className="me-3" style={{ fontWeight: 600 }}>
+          Delivery Type Filter:
+        </strong>
+
+        <div className="form-check form-check-inline" style={{ fontSize: 16 }}>
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id={`takeaway`}
+            checked={deliveryMethod === "takeaway"}
+            onChange={() =>
+              setDeliveryMethod((prev) =>
+                prev === "takeaway" ? "" : "takeaway"
+              )
+            }
+          />
+          <label
+            className="form-check-label"
+            htmlFor={`takeaway`}
+            style={{ textTransform: "capitalize", userSelect: "none" }}
+          >
+            takeaway
+          </label>
+        </div>
+
+        <div className="form-check form-check-inline" style={{ fontSize: 16 }}>
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id={`delivery`}
+            checked={deliveryMethod === "delivery"}
+            onChange={() =>
+              setDeliveryMethod((prev) =>
+                prev === "delivery" ? "" : "delivery"
+              )
+            }
+          />
+          <label
+            className="form-check-label"
+            htmlFor={`delivery`}
+            style={{ textTransform: "capitalize", userSelect: "none" }}
+          >
+            delivery
+          </label>
+        </div>
       </div>
 
       {/* Date Filters */}

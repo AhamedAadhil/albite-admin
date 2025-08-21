@@ -172,8 +172,13 @@ export const PATCH = async (req: NextRequest, res: NextResponse) => {
         : order.userId || order.userId;
 
     await createNotification({
-      message: getOrderStatusMessage(order.orderId, newStatus, rejectionReason),
-      type: "orderStatusUpdate",
+      message: getOrderStatusMessage(
+        order.orderId,
+        order.deliveryMethod,
+        newStatus,
+        rejectionReason
+      ),
+      type: "Order Status Update",
       recipientType: "User",
       recipientId: userId,
     });

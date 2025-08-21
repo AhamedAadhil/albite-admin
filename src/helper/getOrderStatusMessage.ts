@@ -1,5 +1,6 @@
 export function getOrderStatusMessage(
   orderId: string,
+  deliveryMethod: string,
   status: string,
   rejectionReason?: string
 ): string {
@@ -9,7 +10,14 @@ export function getOrderStatusMessage(
     case "accepted":
       return `Good news! Your order (#${orderId}) has been accepted and is being processed.`;
     case "prepared":
-      return `Your order (#${orderId}) is prepared and ready to be dispatched soon.`;
+      if (deliveryMethod === "delivery") {
+        return `Your order (#${orderId}) is prepared and ready to be dispatched soon.`;
+      } else if (deliveryMethod === "takeaway") {
+        return `Your order (#${orderId}) is prepared. Please come to the store to collect your order.`;
+      } else {
+        // fallback message if deliveryMethod unknown
+        return `Your order (#${orderId}) is prepared and ready.`;
+      }
     case "delivered":
       return `Your order (#${orderId}) has been delivered. We hope you enjoy your meal!`;
     case "rejected":
