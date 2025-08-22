@@ -13,7 +13,21 @@ import {
   PointsOverTimeChart,
   ProcessingTimesChart,
   RevenueOverTime,
+  ActiveUsersPieChart,
+  VerifiedUsersPieChart,
+  UserRoleDistributionPieChart,
+  SpendingBracketsBarChart,
+  UserSignupTrend,
+  TopUsersByOrders,
+  RegionDistributionChart,
+  ActiveOtpCountCard,
+  GAUsersSessionsViewsChart,
+  GAUsersByDeviceChart,
+  GAUsersByCountryChart,
+  GATopPagesChart,
+  GARealtimeUsersCard,
 } from "./charts";
+import { transformGoogleAnalyticsData } from "@/helper/transformGoogleAnalyticsData";
 
 interface InsightsData {
   reports: any;
@@ -63,10 +77,6 @@ const Dashboard = () => {
     return <div>Loading...</div>;
   }
 
-  console.log(data, "data");
-
-  // Construct statistics array with fetched data
-  // TODO: modifyt
   const statistics = [
     {
       title: "Total Users",
@@ -98,6 +108,24 @@ const Dashboard = () => {
     },
   ];
 
+  // For Active vs Inactive Users pie chart
+  const activeUsersData = [
+    { name: "Active", value: data.stats.users.activeUsers },
+    { name: "Inactive", value: data.stats.users.inactiveUsers },
+  ];
+
+  // For Verified vs Unverified Users pie chart
+  const verifiedUsersData = [
+    { name: "Verified", value: data.stats.users.verifiedUsers },
+    { name: "Unverified", value: data.stats.users.unverifiedUsers },
+  ];
+
+  // For User Role Distribution pie chart
+  const userRoleData = [
+    { name: "Users", value: data.stats.users.normalUsers },
+    { name: "Admins", value: data.stats.users.admins },
+  ];
+
   return (
     <>
       <PageBreadcrumb title="Welcome!" subName="Dashboard" />
@@ -125,6 +153,52 @@ const Dashboard = () => {
         </Col>
         <Col lg={5}>
           <OrdersOverTimeChart data={data?.stats?.reports?.ordersOverTime} />
+        </Col>
+      </Row>
+
+      {/* Google Analytics Section */}
+      <Row className="mt-4">
+        <Col lg={12}>
+          <GAUsersSessionsViewsChart
+            data={transformGoogleAnalyticsData(
+              data.stats.googleAnalytics.daily
+            )}
+          />
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        {/* <Col lg={3}>
+          <GARealtimeUsersCard
+            activeUsers={Number(
+              data?.stats?.googleAnalytics?.daily?.rows?.[0]?.metricValues?.[0]
+                ?.value || 0
+            )}
+          />
+        </Col> */}
+        <Col lg={4}>
+          <GAUsersByCountryChart
+            data={transformGoogleAnalyticsData(
+              data.stats.googleAnalytics.byCountry
+            )}
+          />
+        </Col>
+        <Col lg={8}>
+          <GAUsersByDeviceChart
+            data={transformGoogleAnalyticsData(
+              data.stats.googleAnalytics.byDevice
+            )}
+          />
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col lg={12}>
+          <GATopPagesChart
+            data={transformGoogleAnalyticsData(
+              data.stats.googleAnalytics.topPages
+            )}
+          />
         </Col>
       </Row>
 
@@ -163,6 +237,50 @@ const Dashboard = () => {
       <Row className="mt-4">
         <Col lg={12}>
           <ProcessingTimesChart data={data?.stats?.reports?.processingTimes} />
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col lg={4}>
+          <ActiveUsersPieChart data={activeUsersData} />
+        </Col>
+        <Col lg={4}>
+          <VerifiedUsersPieChart data={verifiedUsersData} />
+        </Col>
+        <Col lg={4}>
+          <UserRoleDistributionPieChart data={userRoleData} />
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col lg={6}>
+          <SpendingBracketsBarChart data={data.stats.users.spendingBrackets} />
+        </Col>
+        <Col lg={6}>
+          <UserSignupTrend data={data.stats.users.signupTrend} />
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col lg={6}>
+          <TopUsersByOrders data={data.stats.users.topUsersByOrders} />
+        </Col>
+        <Col lg={6}>
+          <RegionDistributionChart data={data.stats.users.regionDistribution} />
+        </Col>
+      </Row>
+
+      <Row className="mt-4">
+        <Col lg={3}>
+          <ActiveOtpCountCard count={data.stats.users.activeOtpCount} />
+        </Col>
+        <Col lg={3}>
+          <GARealtimeUsersCard
+            activeUsers={Number(
+              data?.stats?.googleAnalytics?.daily?.rows?.[0]?.metricValues?.[0]
+                ?.value || 0
+            )}
+          />
         </Col>
       </Row>
     </>

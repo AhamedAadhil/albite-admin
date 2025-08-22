@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { google } from "googleapis";
 import connectDB from "@/config/db";
 import { verifyToken } from "@/helper/isVerified";
 import { User, Order, Dish } from "@/models";
@@ -37,6 +38,80 @@ export async function GET(req: NextRequest) {
     // End of today (current moment)
     const now = new Date();
 
+    const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON!);
+
+    const auth = new google.auth.GoogleAuth({
+      credentials: serviceAccount,
+      scopes: "https://www.googleapis.com/auth/analytics.readonly",
+    });
+
+    const analyticsDataClient = google.analyticsdata({
+      version: "v1beta",
+      auth,
+    });
+
+    const propertyId = process.env.PROPERTY_ID;
+
+    // 1. Daily trends
+    const dailyReport = await analyticsDataClient.properties.runReport({
+      property: `properties/${propertyId}`,
+      requestBody: {
+        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        metrics: [
+          { name: "activeUsers" },
+          { name: "sessions" },
+          { name: "screenPageViews" },
+          { name: "engagedSessions" },
+        ],
+        dimensions: [{ name: "date" }],
+      },
+    });
+
+    // 2. Country distribution
+    const countryReport = await analyticsDataClient.properties.runReport({
+      property: `properties/${propertyId}`,
+      requestBody: {
+        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        metrics: [{ name: "activeUsers" }, { name: "sessions" }],
+        dimensions: [{ name: "country" }],
+      },
+    });
+
+    // 3. Device breakdown
+    const deviceReport = await analyticsDataClient.properties.runReport({
+      property: `properties/${propertyId}`,
+      requestBody: {
+        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        metrics: [{ name: "activeUsers" }, { name: "sessions" }],
+        dimensions: [{ name: "deviceCategory" }],
+      },
+    });
+
+    // 4. Top pages
+    const pageReport = await analyticsDataClient.properties.runReport({
+      property: `properties/${propertyId}`,
+      requestBody: {
+        dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+        metrics: [{ name: "screenPageViews" }],
+        dimensions: [{ name: "pagePath" }],
+        limit: "10",
+        orderBys: [
+          {
+            desc: true,
+            metric: { metricName: "screenPageViews" },
+          },
+        ],
+      },
+    });
+
+    // Combine into a single response for your UI
+    const googleReports = {
+      daily: dailyReport.data,
+      byCountry: countryReport.data,
+      byDevice: deviceReport.data,
+      topPages: pageReport.data,
+    };
+
     // Users cumulative totals
     const usersTotalUntilYesterday = await User.countDocuments({
       createdAt: { $lte: endOfYesterday },
@@ -64,9 +139,6 @@ export async function GET(req: NextRequest) {
       ordersTotalUntilNow,
       ordersTotalUntilYesterday
     );
-
-    // Dish count (total up to now, no daily growth)
-    const dishCount = await Dish.countDocuments({});
 
     // Revenue cumulative totals for delivered orders
     const revenueUntilYesterdayAgg = await Order.aggregate([
@@ -372,12 +444,125 @@ export async function GET(req: NextRequest) {
           }
         : null;
 
+    //USERS INSIGHTS
+    const activeUsersCount = await User.countDocuments({
+      isActive: true,
+      role: 0,
+    });
+    const inactiveUsersCount = await User.countDocuments({
+      isActive: false,
+      role: 0,
+    });
+    const verifiedUsersCount = await User.countDocuments({
+      isVerified: true,
+      role: 0,
+    });
+    const unverifiedUsersCount = await User.countDocuments({
+      isVerified: false,
+      role: 0,
+    });
+
+    // users role distribution
+    const adminCount = await User.countDocuments({ role: 7 });
+    const normalUserCount = await User.countDocuments({ role: 0 });
+
+    // total spending
+    const spendingBracketsAgg = await User.aggregate([
+      { $match: { role: 0 } },
+      {
+        $bucket: {
+          groupBy: "$totalSpent",
+          boundaries: [0, 100, 500, 1000, 5000, 10000, Infinity],
+          default: "Other",
+          output: { count: { $sum: 1 } },
+        },
+      },
+    ]);
+
+    // signup trends over time
+    const userSignupTrendAgg = await User.aggregate([
+      {
+        $match: {
+          role: 0,
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+            day: { $dayOfMonth: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } },
+    ]);
+    const userSignupTrend = userSignupTrendAgg.map((item) => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(
+        2,
+        "0"
+      )}-${String(item._id.day).padStart(2, "0")}`,
+      count: item.count,
+    }));
+
+    // order counts per user
+    const ordersPerUserAgg = await User.aggregate([
+      { $match: { role: 0 } },
+      {
+        $lookup: {
+          from: "orders",
+          localField: "orders",
+          foreignField: "_id",
+          as: "userOrders",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          ordersCount: { $size: "$userOrders" },
+        },
+      },
+      { $sort: { ordersCount: -1 } },
+      { $limit: 10 }, // Top 10 users by orders count
+    ]);
+
+    // region distribution
+    const regionDistribution = await User.aggregate([
+      { $match: { role: 0 } },
+      {
+        $group: {
+          _id: "$region",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // active otp count
+    const activeOtpCount = await User.countDocuments({
+      otpExpires: { $gte: new Date() },
+      otp: { $ne: "" },
+    });
+
     return NextResponse.json({
       stats: {
         users: {
           total: usersTotalUntilNow,
           growthToday: usersGrowthToday,
           growthPercent: usersGrowthPercent,
+          activeUsers: activeUsersCount,
+          inactiveUsers: inactiveUsersCount,
+          verifiedUsers: verifiedUsersCount,
+          unverifiedUsers: unverifiedUsersCount,
+          admins: adminCount,
+          normalUsers: normalUserCount,
+          spendingBrackets: spendingBracketsAgg,
+          signupTrend: userSignupTrend,
+          topUsersByOrders: ordersPerUserAgg,
+          regionDistribution,
+          activeOtpCount,
         },
         orders: {
           total: ordersTotalUntilNow,
@@ -404,6 +589,7 @@ export async function GET(req: NextRequest) {
           pointsOverTime,
           processingTimes,
         },
+        googleAnalytics: googleReports,
       },
       success: true,
     });

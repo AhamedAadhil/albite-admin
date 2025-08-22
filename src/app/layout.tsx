@@ -3,17 +3,17 @@ import AppProvidersWrapper from "@/components/wrappers/AppProvidersWrapper";
 import Image from "next/image";
 import { DEFAULT_PAGE_TITLE } from "@/context/constants";
 import { Metadata } from "next";
-
-import '@/assets/scss/app.scss';
-import '@/assets/scss/icons.scss';
+import "@/assets/scss/app.scss";
+import "@/assets/scss/icons.scss";
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Velonic-NextJs - Bootstrap 5 Admin & Dashboard Template',
+    template: "%s | Velonic-NextJs - Bootstrap 5 Admin & Dashboard Template",
     default: DEFAULT_PAGE_TITLE,
   },
-  description: 'A fully responsive admin theme which can be used to build CRM, CMS,ERP etc.',
-}
+  description:
+    "A fully responsive admin theme which can be used to build CRM, CMS,ERP etc.",
+};
 
 const splashScreenStyles = `
 #splash-screen {
@@ -44,8 +44,7 @@ const splashScreenStyles = `
     visibility: hidden;
   }
 }
-`
-
+`;
 
 export default function RootLayout({
   children,
@@ -59,7 +58,14 @@ export default function RootLayout({
       </head>
       <body className={``}>
         <div id="splash-screen">
-          <Image alt="Logo" width={112} height={24} src={logoDark} style={{ height: '7%', width: 'auto' }} priority />
+          <Image
+            alt="Logo"
+            width={112}
+            height={24}
+            src={logoDark}
+            style={{ height: "7%", width: "auto" }}
+            priority
+          />
         </div>
         <div id="__next_splash">
           <AppProvidersWrapper>{children}</AppProvidersWrapper>

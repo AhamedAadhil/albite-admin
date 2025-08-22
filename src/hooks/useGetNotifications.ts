@@ -26,6 +26,5 @@ export const useGetNotifications = () => {
     fetchNotifications();
   }, []);
 
-  console.log("notifications", notifications);
   return { notifications, error, refetchNotifications: fetchNotifications };
 };
