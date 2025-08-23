@@ -59,27 +59,6 @@ export default function DishesPage() {
     fetchDishes(); // call only once at initial load
   }, []);
 
-  // useEffect(() => {
-  //   if (existingAddOn) {
-  //     setFormData({
-  //       name: existingAddOn.name,
-  //       price: String(existingAddOn.price),
-  //       mainCategory: existingAddOn.mainCategory,
-  //       isActive: existingAddOn.isActive,
-  //     });
-  //     // Optionally preload image preview (if available)
-  //     // Skip file setting as it's not a File object
-  //   } else {
-  //     setFormData({
-  //       name: "",
-  //       price: "",
-  //       mainCategory: "breakfast",
-  //       isActive: true,
-  //     });
-  //     setImageFile(null);
-  //   }
-  // }, [existingAddOn, show]);
-
   return (
     <Container fluid>
       <div className="d-flex justify-content-between align-items-center mt-4 mb-3">

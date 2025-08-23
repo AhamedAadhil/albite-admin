@@ -4,6 +4,7 @@ import { IOrder } from "./order";
 
 // 1. Interface
 export interface IUser extends Document {
+  hasCart: any;
   _id: mongoose.Types.ObjectId;
   name: string;
   email: string;

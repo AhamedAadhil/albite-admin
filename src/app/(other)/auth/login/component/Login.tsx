@@ -166,7 +166,7 @@ const Login = () => {
                               )}
                             </button>
                           </div>
-                          <div className="text-center mt-4">
+                          {/* <div className="text-center mt-4">
                             <p className="text-muted fs-16">Sign in with</p>
                             <div className="d-flex gap-2 justify-content-center mt-3">
                               <Button variant="soft-primary">
@@ -182,7 +182,7 @@ const Login = () => {
                                 <i className="ri-github-fill" />
                               </Button>
                             </div>
-                          </div>
+                          </div> */}
                         </form>
                       </div>
                     </div>
@@ -191,7 +191,7 @@ const Login = () => {
               </Card>
             </Col>
           </Row>
-          <div className="row">
+          {/* <div className="row">
             <div className="col-12 text-center">
               <p className="text-dark-emphasis">
                 Don&apos;t have an account?{" "}
@@ -203,7 +203,7 @@ const Login = () => {
                 </a>
               </p>
             </div>
-          </div>
+          </div> */}
         </Container>
       </div>
       <footer className="footer footer-alt fw-medium">

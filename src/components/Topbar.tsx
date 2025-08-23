@@ -4,17 +4,10 @@ import logo from "@/assets/images/logo.png";
 import logoSm from "@/assets/images/logo-sm.png";
 import logoDark from "@/assets/images/logo-dark.png";
 import profilePic from "@/assets/images/users/avatar-1.jpg";
-import avatar1 from "@/assets/images/users/avatar-1.jpg";
-import avatar2 from "@/assets/images/users/avatar-2.jpg";
-import avatar3 from "@/assets/images/users/avatar-3.jpg";
-import avatar4 from "@/assets/images/users/avatar-4.jpg";
-import avatar5 from "@/assets/images/users/avatar-5.jpg";
 import { ThemeSettings, useThemeContext } from "@/context/useThemeContext";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
 import SearchDropDown from "./layouts/topbar/SearchDropDown";
-import LanguageDropdown from "./layouts/topbar/LanguageDropdown";
-import MessageDropdown from "./layouts/topbar/MessageDropdown";
 import NotificationDropdown from "./layouts/topbar/NotificationDropdown";
 import ProfileDropdown from "./layouts/topbar/ProfileDropdown";
 import useViewport from "@/hooks/useViewPort";
@@ -371,7 +364,7 @@ const Topbar = ({ toggleMenu, navOpen }: TopbarProps) => {
             </li>
             <li className="dropdown">
               <ProfileDropdown
-                menuItems={profileMenus}
+                // menuItems={profileMenus}
                 userImage={profilePic}
                 username="Aseez Mohamed"
               />

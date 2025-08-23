@@ -13,6 +13,8 @@ import {
 import { useSearchParams, useRouter } from "next/navigation";
 import UserCard from "./UserCard";
 import { IUser } from "@/models/user";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -33,6 +35,110 @@ export default function UsersPage() {
   );
   const [isActive, setIsActive] = useState(searchParams.get("isActive") || "");
   const [hasCart, setHasCart] = useState(searchParams.get("hasCart") || "");
+
+  async function handlePrintUsers() {
+    const usersHtml = users
+      .map(
+        (user, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td>${user.name || "N/A"}</td>
+          <td>${user.email || "N/A"}</td>
+          <td>${user.mobile || "N/A"}</td>
+          <td>${user.region || "N/A"}</td>
+          <td>${user.isVerified ? "✅" : "❌"}</td>
+          <td>${user.isActive ? "Active" : "Inactive"}</td>
+          <td>${user.hasCart ? "Yes" : "No"}</td>
+        </tr>`
+      )
+      .join("");
+
+    const printWindow = window.open("", "_blank", "width=800,height=600");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Users List</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 12px;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+          }
+          th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: left;
+          }
+          th {
+            background: #f8f9fa;
+          }
+          h2 {
+            margin-bottom: 16px;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Users Report (${users.length} Users)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Mobile</th>
+              <th>Region</th>
+              <th>Verified</th>
+              <th>Status</th>
+              <th>Has Cart</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${usersHtml}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  }
+
+  async function handleExportExcelUsers() {
+    const exportData = users.map((user, idx) => ({
+      "#": idx + 1,
+      Name: user.name || "N/A",
+      Email: user.email || "N/A",
+      Mobile: user.mobile || "N/A",
+      Region: user.region || "N/A",
+      Verified: user.isVerified ? "Yes" : "No",
+      Status: user.isActive ? "Active" : "Inactive",
+      "Has Cart": user.hasCart ? "Yes" : "No",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const data = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    saveAs(data, "users.xlsx");
+  }
 
   // Fetch users with filters
   const fetchUsers = async () => {
@@ -85,10 +191,30 @@ export default function UsersPage() {
 
   return (
     <Container fluid>
-      <h4 className="fw-bold mt-4 mb-3">
-        {" "}
-        <i className="ri-user-line me-2"></i> Users ({users.length})
-      </h4>
+      <div className="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h4 className="fw-bold mb-0">
+          <i className="ri-user-line me-2"></i> Users ({users.length})
+        </h4>
+
+        <span className="text-muted d-flex align-items-center gap-2">
+          <button
+            type="button"
+            className="btn btn-outline-success"
+            aria-label="Export to Excel"
+            onClick={handleExportExcelUsers}
+          >
+            <i className="ri-file-excel-2-line me-1"></i> Export Excel
+          </button>
+          <button
+            type="button"
+            className="btn  btn-outline-secondary"
+            aria-label="Print Users List"
+            onClick={handlePrintUsers}
+          >
+            <i className="ri-printer-line me-1"></i> Print
+          </button>
+        </span>
+      </div>
 
       {/* Filters */}
       <Form onSubmit={applyFilters} className="mb-4">

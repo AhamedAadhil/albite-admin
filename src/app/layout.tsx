@@ -8,11 +8,11 @@ import "@/assets/scss/icons.scss";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Velonic-NextJs - Bootstrap 5 Admin & Dashboard Template",
+    template: "%s | Albite Cloud Kitchen",
     default: DEFAULT_PAGE_TITLE,
   },
   description:
-    "A fully responsive admin theme which can be used to build CRM, CMS,ERP etc.",
+    "Albite Cloud Kitchen - Your favorite meals delivered fresh and fast. Explore our menu, order online, and enjoy delicious food from the comfort of your home.",
 };
 
 const splashScreenStyles = `
