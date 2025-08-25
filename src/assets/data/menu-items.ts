@@ -96,6 +96,16 @@ const MENU_ITEMS: MenuItemTypes[] = [
     isTitle: true,
   },
   {
+    key: "configs",
+    label: "Configs",
+    isTitle: false,
+    url: "/configs",
+    icon: "ri-tools-line",
+    // badge: {
+    //   variant: "danger",
+    // },
+  },
+  {
     key: "logout",
     label: "Logout",
     isTitle: false,

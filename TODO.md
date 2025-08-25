@@ -1,3 +1,3 @@
 # TODO
 
-Everything works as expect
+Make sure to seed the seedSettings first
